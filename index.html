@@ -2,127 +2,135 @@
 <html lang="ru">
 <head>
     <meta charset="utf-8">
-    <title>Калькулятор</title>
+    <title>Калькулятор с рекламой</title>
     <style>
-        /* Ваши стили остаются без изменений */
+        /* Reset and basic styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font: bold 14px Arial, sans-serif;
+        }
+
+        html {
+            height: 100%;
+            background: radial-gradient(circle, #fff 20%, #ccc);
+            background-size: cover;
+        }
+
+        #calculator {
+            width: 325px;
+            margin: 100px auto;
+            padding: 20px;
+            background: linear-gradient(#9dd2ea, #8bceec);
+            border-radius: 3px;
+            box-shadow: 0px 4px #009de4, 0px 10px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .top .screen {
+            height: 40px;
+            width: 100%;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 3px;
+            color: white;
+            text-align: right;
+            letter-spacing: 1px;
+        }
+
+        .keys span {
+            display: inline-block;
+            width: 70px;
+            height: 36px;
+            background: white;
+            border-radius: 3px;
+            box-shadow: 0px 4px rgba(0, 0, 0, 0.2);
+            margin: 7px;
+            text-align: center;
+            line-height: 36px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .keys span:hover {
+            background: #9c89f6;
+            color: white;
+        }
+
+        .eval {
+            background: #f1ff92;
+        }
     </style>
-    <!-- Подключаем VK Bridge -->
-    <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>  
+    <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
 </head>
 <body>
     <div id="calculator">
         <div class="top">
-            <span class="clear">C</span>
-            <div class="screen"></div>
+            <div class="screen" id="screen">0</div>
         </div>
-    
         <div class="keys">
-            <!-- Операторы и клавиши -->
-            <span>7</span>
-            <span>8</span>
-            <span>9</span>
-            <span class="operator">+</span>
-            <span>4</span>
-            <span>5</span>
-            <span>6</span>
-            <span class="operator">-</span>
-            <span>1</span>
-            <span>2</span>
-            <span>3</span>
-            <span class="operator">÷</span>
-            <span>0</span>
-            <span>.</span>
-            <span class="eval">=</span>
-            <span class="operator">x</span>
+            <span>7</span><span>8</span><span>9</span><span class="operator">+</span>
+            <span>4</span><span>5</span><span>6</span><span class="operator">-</span>
+            <span>1</span><span>2</span><span>3</span><span class="operator">÷</span>
+            <span>0</span><span>.</span><span class="eval">=</span><span class="operator">x</span>
         </div>
     </div>
- 
-<script>
-    // Инициализация VK Bridge
-    vkBridge.send("VKWebAppInit")
-        .then(() => {
-            console.log('VK Bridge успешно инициализирован');
-        })
-        .catch((error) => {
-            console.log('Ошибка инициализации VK Bridge:', error);
-        });
 
-    // Переменные для работы с калькулятором
-    var keys = document.querySelectorAll('#calculator span');
-    var operators = ['+', '-', 'x', '÷'];
-    var decimalAdded = false;
- 
-    // Добавляем обработчик на все клавиши
-    for (var i = 0; i < keys.length; i++) {
-        keys[i].onclick = function (e) {
-            var input = document.querySelector('.screen');
-            var inputVal = input.innerHTML;
-            var btnVal = this.innerHTML;
-            
-            if (btnVal == 'C') {
-                input.innerHTML = '';
-                decimalAdded = false;
-            } else if (btnVal == '=') {
-                var equation = inputVal;
-                var lastChar = equation[equation.length - 1];
-                
-                // Показываем рекламу перед вычислением
-                showAd();
-
-                // Замена символов операций
-                equation = equation.replace(/x/g, '*').replace(/÷/g, '/');
-                
-                if (operators.indexOf(lastChar) > -1 || lastChar == '.') {
-                    equation = equation.replace(/.$/, '');
-                }
-
-                if (equation) {
-                    input.innerHTML = eval(equation);
-                }
-
-                decimalAdded = false;
-            } else if (operators.indexOf(btnVal) > -1) {
-                var lastChar = inputVal[inputVal.length - 1];
-
-                if (inputVal != '' && operators.indexOf(lastChar) == -1) {
-                    input.innerHTML += btnVal;
-                } else if (inputVal == '' && btnVal == '-') {
-                    input.innerHTML += btnVal;
-                }
-
-                if (operators.indexOf(lastChar) > -1 && inputVal.length > 1) {
-                    input.innerHTML = inputVal.replace(/.$/, btnVal);
-                }
-
-                decimalAdded = false;
-            } else if (btnVal == '.') {
-                if (!decimalAdded) {
-                    input.innerHTML += btnVal;
-                    decimalAdded = true;
-                }
-            } else {
-                input.innerHTML += btnVal;
-            }
-
-            e.preventDefault();
-        }
-    }
-
-    // Функция показа рекламы
-    function showAd() {
-        vkBridge.send('VKWebAppShowNativeAds', { ad_format: 'reward' })
-            .then((data) => {
-                if (data.result) {
-                    console.log('Реклама показана');
-                } else {
-                    console.log('Ошибка при показе рекламы');
-                }
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Инициализация VK Bridge
+            vkBridge.send('VKWebAppInit')
+            .then(() => {
+                console.log('VK Bridge инициализирован');
             })
             .catch((error) => {
-                console.log('Ошибка при показе рекламы:', error);
+                console.log('Ошибка при инициализации VK Bridge', error);
             });
-    }
-</script>
 
+            // Логика калькулятора
+            const screen = document.getElementById('screen');
+            let currentInput = '';
+            let operators = ['+', '-', 'x', '÷'];
+            let decimalAdded = false;
+
+            document.querySelectorAll('.keys span').forEach(key => {
+                key.addEventListener('click', function() {
+                    const btnVal = this.textContent;
+
+                    if (btnVal === 'C') {
+                        currentInput = '';
+                        screen.textContent = '0';
+                        decimalAdded = false;
+                    } else if (btnVal === '=') {
+                        if (currentInput) {
+                            currentInput = currentInput.replace(/x/g, '*').replace(/÷/g, '/');
+                            screen.textContent = eval(currentInput);
+                            currentInput = screen.textContent;
+
+                            // Показ рекламы при нажатии на "="
+                            vkBridge.send('VKWebAppShowNativeAds', { ad_format: 'reward' })
+                            .then((data) => {
+                                if (data.result) {
+                                    console.log('Реклама показана');
+                                } else {
+                                    console.log('Ошибка при показе рекламы');
+                                }
+                            })
+                            .catch((error) => {
+                                console.log('Ошибка при показе рекламы', error);
+                            });
+                        }
+                    } else {
+                        if (operators.includes(btnVal) && operators.includes(currentInput.slice(-1))) {
+                            currentInput = currentInput.slice(0, -1) + btnVal;
+                        } else {
+                            currentInput += btnVal;
+                        }
+                        screen.textContent = currentInput || '0';
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
